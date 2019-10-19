@@ -2,12 +2,18 @@ package com.example.ideahack;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 
+import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -20,6 +26,7 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -29,8 +36,11 @@ import java.util.ArrayList;
 public class AdminPanel extends AppCompatActivity implements View.OnClickListener {
     BarChart barChart;
     CardView totaluser,totalpost,topSubmitters,topVoters;
-    int totalpostsize;
+    int totalpostsize=0;
+    TextView textUser;
     int totalusers;
+
+    Toolbar toolbar;
 
 
     FirebaseFirestore db=FirebaseFirestore.getInstance();
@@ -41,6 +51,10 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         setContentView(R.layout.activity_admin_panel);
 
         barChart = findViewById(R.id.barchartid);
+        textUser=findViewById(R.id.textTotaluser);
+        toolbar=findViewById(R.id.custom_toolbar);
+
+
 
         barChart.setDrawBarShadow(false);
         barChart.setDrawValueAboveBar(true);
@@ -49,7 +63,7 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         barChart.setDrawGridBackground(false);
 
         gettingData();
-
+        textUser.setText(String.valueOf(totalusers));
         Toast.makeText(AdminPanel.this,String.valueOf(totalusers),Toast.LENGTH_LONG).show();
 
 
@@ -68,7 +82,7 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
 
         BarData barData = new BarData(barDataSet);
-        barData.setBarWidth(.9f);
+        barData.setBarWidth(.7f);
 
         barChart.setData(barData);
 
@@ -81,6 +95,12 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         totalpost.setOnClickListener(this);
         topSubmitters.setOnClickListener(this);
         topVoters.setOnClickListener(this);
+
+        setSupportActionBar(toolbar);
+
+
+
+        getSupportActionBar().setTitle("Dashboard");
 
 
 
@@ -95,8 +115,11 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
 
                 if (task.isSuccessful())
                 {
-                    totalpostsize=task.getResult().size();
-                    Log.d("Totalp",String.valueOf(totalpostsize));
+                    for(QueryDocumentSnapshot documentSnapshot: task.getResult())
+                    {
+
+                    }
+                    //Log.d("Totalp",String.valueOf(totalpostsize));
                 }
 
             }
@@ -107,10 +130,21 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                totalusers=task.getResult().size();
+
+
             }
         });
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.logout,menu);
+        return true;
+
+    }
+
 
     @Override
     public void onClick(View view) {
@@ -130,4 +164,19 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         }
 
     }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId())
+        {
+            case R.id.logoutid:
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(AdminPanel.this,MainActivity.class));
+                finish();
+
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }
