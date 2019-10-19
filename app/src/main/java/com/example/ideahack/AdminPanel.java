@@ -174,7 +174,6 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
                 startActivity(new Intent(AdminPanel.this,MainActivity.class));
                 finish();
 
-
         }
         return super.onOptionsItemSelected(item);
     }
