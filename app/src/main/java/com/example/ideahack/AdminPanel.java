@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,8 +26,10 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -37,21 +40,37 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
     BarChart barChart;
     CardView totaluser,totalpost,topSubmitters,topVoters;
     int totalpostsize=0;
-    TextView textUser;
+    TextView textUser,totalposttext;
     int totalusers;
 
     Toolbar toolbar;
+    private LinearLayout mButton4;
+
+    private FirebaseFirestore db=FirebaseFirestore.getInstance();
+    private CollectionReference notebookRef = db.collection("userinfo");
 
 
-    FirebaseFirestore db=FirebaseFirestore.getInstance();
-
+    int TotalUser = 0; //map.size();
+    int TotalSubmitPost = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_panel);
 
+        mButton4 = (LinearLayout)findViewById(R.id.button4);
+        mButton4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(AdminPanel.this, TopVoters.class));
+            }
+        });
+
+        totalposttext = findViewById(R.id.totalposttextz);
+
         barChart = findViewById(R.id.barchartid);
+
         textUser=findViewById(R.id.textTotaluser);
+
         toolbar=findViewById(R.id.custom_toolbar);
 
 
@@ -63,8 +82,6 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         barChart.setDrawGridBackground(false);
 
         gettingData();
-        textUser.setText(String.valueOf(totalusers));
-        Toast.makeText(AdminPanel.this,String.valueOf(totalusers),Toast.LENGTH_LONG).show();
 
 
 
@@ -72,7 +89,7 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
 
         ArrayList<BarEntry> barEntries = new ArrayList<>();
 
-        barEntries.add(new BarEntry(1,totalusers));
+        barEntries.add(new BarEntry(1,TotalUser));
         barEntries.add(new BarEntry(2, totalpostsize));
         barEntries.add(new BarEntry(3, 10f));
         barEntries.add(new BarEntry(4, 40f));
@@ -102,7 +119,31 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
 
         getSupportActionBar().setTitle("Dashboard");
 
+        notebookRef.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        String data = "";
 
+                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                            Note note = documentSnapshot.toObject(Note.class);
+                            //note.setDocumentId(documentSnapshot.getId());
+                            String username = note.getUsername();
+                            String uid = note.getUserid();          TotalUser++;
+                            int givevote = note.getGiveVote();
+                            int submit = note.getSubmit();          TotalSubmitPost = TotalSubmitPost + submit;
+                            Toast.makeText(AdminPanel.this, "UID "+" "+ uid+"  Vote "+submit, Toast.LENGTH_SHORT).show();
+                            textUser.setText(TotalUser+"");
+                            totalposttext.setText(TotalSubmitPost+"");
+
+                        }
+
+                    }
+                });
+
+            //Set Data
+            //TotalUser = 0;
+            //Toast.makeText(AdminPanel.this, "TotalUser "+" "+ TotalUser+"  TotalSubmitPost"+TotalSubmitPost, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -152,6 +193,7 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
         switch (view.getId())
         {
             case R.id.totaluserid:
+
                 break;
 
             case R.id.totalpost:
@@ -159,6 +201,7 @@ public class AdminPanel extends AppCompatActivity implements View.OnClickListene
               case R.id.topSubmitters:
                 break;
               case R.id.topVoters:
+
                 break;
 
         }
