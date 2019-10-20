@@ -7,9 +7,11 @@
     tools:context=".TopVoters">
 
     <ListView
-        android:id="@+id/top_viewers_list"
+        android:id="@+id/mainlistId2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp" />
+        android:layout_height="match_parent">
+
+    </ListView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+

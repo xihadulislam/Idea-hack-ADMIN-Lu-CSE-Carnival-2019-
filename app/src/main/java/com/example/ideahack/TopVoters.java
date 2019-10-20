@@ -1,72 +1,71 @@
 package com.example.ideahack;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TopVoters extends AppCompatActivity {
 
-    private ListView mTopViewersList;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference notebookRef = db.collection("userinfo");
+
+
+    ListView listView;
+
+    List<UserModel> listModelList=new ArrayList<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_voters);
 
-        mTopViewersList = (ListView) findViewById(R.id.top_viewers_list);
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
-        map.put("a", 4);    //DEMO
-        map.put("c", 6);
-        map.put("b", 2);
+        listView = findViewById(R.id.mainlistId2);
 
-        notebookRef.get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String data = "";
+        Query query = FirebaseFirestore.getInstance().collection("userinfo").orderBy("giveVote", Query.Direction.DESCENDING).limit(10);
 
-                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                            Note note = documentSnapshot.toObject(Note.class);
-                            //note.setDocumentId(documentSnapshot.getId());
-                            String username = note.getUsername();
-                            String uid = note.getUserid();
-                            int givevote = note.getGiveVote();
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                            Toast.makeText(TopVoters.this, username+" "+ uid+"  "+givevote, Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful()){
 
-                        }
+                    for (DocumentSnapshot doc : task.getResult()){
+
+                        UserModel userModel = doc.toObject(UserModel.class);
+
+                        listModelList.add(userModel);
 
                     }
-                });
 
-        Object[] a = map.entrySet().toArray();
-        Arrays.sort(a, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                return ((Map.Entry<String, Integer>) o2).getValue()
-                        .compareTo(((Map.Entry<String, Integer>) o1).getValue());
+                    TopvoterAdapter adapter = new TopvoterAdapter(TopVoters.this,listModelList);
+                    listView.setAdapter(adapter);
+
+                }
+
             }
         });
 
-        for (Object e : a) {
-
-            //System.out.println(((Map.Entry<String, Integer>) e).getKey() + " : "
-            //        + ((Map.Entry<String, Integer>) e).getValue());
 
 
-        }
+
     }
 }

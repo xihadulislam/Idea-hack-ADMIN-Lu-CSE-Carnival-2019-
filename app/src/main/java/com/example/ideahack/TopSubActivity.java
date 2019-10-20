@@ -3,6 +3,7 @@ package com.example.ideahack;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DownloadManager;
 import android.os.Bundle;
 import android.widget.ListView;
 
@@ -16,7 +17,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListOfUser extends AppCompatActivity {
+public class TopSubActivity extends AppCompatActivity {
 
 
     ListView listView;
@@ -28,12 +29,12 @@ public class ListOfUser extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_of_user);
+        setContentView(R.layout.activity_top_sub);
 
 
-        listView = findViewById(R.id.mainlistId23);
+        listView = findViewById(R.id.mainlistId);
 
-        Query query = FirebaseFirestore.getInstance().collection("userinfo").orderBy("create_at", Query.Direction.DESCENDING);
+        Query query = FirebaseFirestore.getInstance().collection("userinfo").orderBy("submit", Query.Direction.DESCENDING).limit(10);
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -49,7 +50,7 @@ public class ListOfUser extends AppCompatActivity {
 
                     }
 
-                    TotalUserAdapter adapter = new TotalUserAdapter(ListOfUser.this,listModelList);
+                    TopSubmiterAdapter adapter = new TopSubmiterAdapter(TopSubActivity.this,listModelList);
                     listView.setAdapter(adapter);
 
                 }
@@ -62,4 +63,3 @@ public class ListOfUser extends AppCompatActivity {
 
     }
 }
-
